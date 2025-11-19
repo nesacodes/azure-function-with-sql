@@ -1,0 +1,23 @@
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+
+# Binaries
+bin/
+obj/
+
+# Azurite
+__azurite_db*__.json
+
+# Azure Functions
+.azurefunctions/
+local.settings.json
+/bin
+/obj
