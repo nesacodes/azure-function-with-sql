@@ -5,12 +5,15 @@ function Get-DbConnection {
         [string]$token
     )
  # Build connection string (no username/password needed)
-    $connectionString = "Server=tcp:$sqlServer,1433;Database=$sqlDatabase;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+   $connectionString = "Server=tcp:$sqlServer,1433;Database=$sqlDatabase;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    Write-Host "constring: $($connectionString)"
+    Write-Host "Access token: $($token)"
     # Create SQL Connection with Access Token
     $connection = New-Object System.Data.SqlClient.SqlConnection
     $connection.ConnectionString = $connectionString
     $connection.AccessToken = $token  # This is the key for Managed Identity auth
-    
+
+    Write-Host "Attempting to open connection..."
     # Open connection
     $connection.Open()
     Write-Host "Connected to SQL Database successfully using Managed Identity"

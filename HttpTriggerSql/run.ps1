@@ -32,16 +32,17 @@ else {
         # Get Access Token using Managed Identity
         Write-Host "Acquiring access token using Managed Identity..."
         # $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net/").Token
-        f ($env:IDENTITY_ENDPOINT -and $env:IDENTITY_HEADER) {
-        # Newer Functions MSI pattern
-        $tokenAuthUri = "$($env:IDENTITY_ENDPOINT)?resource=$resourceUri&api-version=2019-08-01"
-        $tokenResponse = Invoke-RestMethod -Method Get -Headers @{ "X-IDENTITY-HEADER" = $env:IDENTITY_HEADER } -Uri $tokenAuthUri
-    }
-    else {
-        # Fallback to classic IMDS endpoint
-        $tokenAuthUri = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=$resourceUri"
-        $tokenResponse = Invoke-RestMethod -Method Get -Headers @{ "Metadata" = "true" } -Uri $tokenAuthUri
-    }
+        $resourceUri = "https://database.windows.net/"
+        if ($env:IDENTITY_ENDPOINT -and $env:IDENTITY_HEADER) {
+            # Newer Functions MSI pattern
+            $tokenAuthUri = "${env:IDENTITY_ENDPOINT}?resource=$resourceUri&api-version=2019-08-01"
+            $tokenResponse = Invoke-RestMethod -Method Get -Headers @{ "X-IDENTITY-HEADER" = $env:IDENTITY_HEADER } -Uri $tokenAuthUri
+        }
+        else {
+            # Fallback to classic IMDS endpoint
+            $tokenAuthUri = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=$resourceUri"
+            $tokenResponse = Invoke-RestMethod -Method Get -Headers @{ "Metadata" = "true" } -Uri $tokenAuthUri
+        }
 
     $token = $tokenResponse.access_token
 
@@ -49,9 +50,12 @@ else {
         throw "Failed to acquire access token from Managed Identity endpoint."
     }
 
+    Write-Host "Token acquired successfully. Token length: $($token.Length)"
+    Write-Host "Token response type: $($tokenResponse.token_type)"
+
         # Get database connection
         $connection = Get-DbConnection -sqlServer $sqlServer -sqlDatabase $sqlDatabase -token $token
-
+    
         # Create SQL Command for Stored Procedure
         $command = New-Object System.Data.SqlClient.SqlCommand
         $command.Connection = $connection
