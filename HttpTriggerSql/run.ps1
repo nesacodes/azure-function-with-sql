@@ -6,9 +6,8 @@ param($Request, $TriggerMetadata)
 # Get environment variables for database connection
 $db_server = $env:db_server
 $db_name = $env:db_name
-$db_user = $env:db_user
-$db_password = $env:db_password
 $stored_procedure = $env:stored_procedure
+
 
 # Check if all required environment variables are set
 if (-not ($db_server -and $db_name -and $db_user -and $db_password -and $stored_procedure)) {
