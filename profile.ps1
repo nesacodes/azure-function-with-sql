@@ -1,10 +1,12 @@
 # This file is executed when the function app starts.
 # You can use it to run initialization commands.
 
+# Azure Functions profile.ps1
+# This profile is loaded on every cold start.
+Import-Module Az.Accounts -RequiredVersion '1.9.5'
 if ($env:MSI_SECRET) {
-    Write-Host "Managed identity is enabled for this function app."
-} else {
-    Write-Host "Managed identity is not enabled for this function app."
+    Disable-AzContextAutosave -Scope Process | Out-Null
+    Connect-AzAccount -Identity
 }
 
 Write-Host "PowerShell profile executed."
