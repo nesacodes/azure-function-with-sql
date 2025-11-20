@@ -1,3 +1,4 @@
+using namespace System.Net
 param($Request, $TriggerMetadata)
 
 # Import helper functions
@@ -30,7 +31,23 @@ else {
     try {
         # Get Access Token using Managed Identity
         Write-Host "Acquiring access token using Managed Identity..."
-        $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net/").Token
+        # $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net/").Token
+        f ($env:IDENTITY_ENDPOINT -and $env:IDENTITY_HEADER) {
+        # Newer Functions MSI pattern
+        $tokenAuthUri = "$($env:IDENTITY_ENDPOINT)?resource=$resourceUri&api-version=2019-08-01"
+        $tokenResponse = Invoke-RestMethod -Method Get -Headers @{ "X-IDENTITY-HEADER" = $env:IDENTITY_HEADER } -Uri $tokenAuthUri
+    }
+    else {
+        # Fallback to classic IMDS endpoint
+        $tokenAuthUri = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=$resourceUri"
+        $tokenResponse = Invoke-RestMethod -Method Get -Headers @{ "Metadata" = "true" } -Uri $tokenAuthUri
+    }
+
+    $token = $tokenResponse.access_token
+
+    if (-not $token) {
+        throw "Failed to acquire access token from Managed Identity endpoint."
+    }
 
         # Get database connection
         $connection = Get-DbConnection -sqlServer $sqlServer -sqlDatabase $sqlDatabase -token $token

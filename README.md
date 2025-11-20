@@ -36,3 +36,9 @@ Once deployed, you can trigger the function by sending an HTTP request to its UR
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request with your changes.
+
+
+CREATE USER func-cnn3-dev-api-integration FROM EXTERNAL PROVIDER;
+ALTER ROLE db_datareader ADD MEMBER [your-function-app-name];
+ALTER ROLE db_datawriter ADD MEMBER [your-function-app-name];
+GRANT EXECUTE TO [your-function-app-name];
